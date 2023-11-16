@@ -15,10 +15,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Random;
 import java.util.UUID;
-
 @Service
 public class CustomerServiceImpl implements CustomerService {
     @Autowired
@@ -28,33 +25,34 @@ public class CustomerServiceImpl implements CustomerService {
     private AddressRepository addressRepository;
 
     @Autowired
-    private RabbitTemplate template;
+    private RabbitTemplate rabbitTemplate;
 
-    private static final Logger LOGGER= LoggerFactory.getLogger(CustomerServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerServiceImpl.class);
+
     @Override
     public String createCustomer(CustomerDto customerDto) {
-        Customer customer=customerRepository.findByEmail(customerDto.getEmail());
-        if(customer==null){
-            Customer customer1=new Customer();
-            Address address=new Address();
-            BeanUtils.copyProperties(customerDto,customer1);
-            customer1.setConversationId(UUID.randomUUID().toString());
-            BeanUtils.copyProperties(customerDto.getAddressDto(), address);
-            Long id=new Random().nextLong();
-            address.setId(id);
-            String state=address.getState();
-            String keyState=StateConverter.convertToAbbreviation(state);
-            address.setState(keyState);
-            addressRepository.save(address);
-            customer1.setAddress(address);
-            customerRepository.save(customer1);
-            LOGGER.info("customer saved successfully");
-            template.convertAndSend(MQConfig.EXCHANGE,MQConfig.MESSAGE_ROUTING_KEY,customer1);
-            LOGGER.info("Message added to Queue by MessageBroker RabbitMQ");
-            return customer1.getConversationId();
-        }
-        else{
+        Customer existingCustomer = customerRepository.findByEmail(customerDto.getEmail());
+
+        if (existingCustomer != null) {
             throw new CustomerConflictExists();
         }
+
+        Address address = new Address();
+        BeanUtils.copyProperties(customerDto.getAddressDto(), address);
+        address.setId(UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE);
+        address.setState(StateConverter.convertToAbbreviation(address.getState()));
+        addressRepository.save(address);
+
+        Customer newCustomer = new Customer();
+        BeanUtils.copyProperties(customerDto, newCustomer);
+        newCustomer.setConversationId(UUID.randomUUID().toString());
+        newCustomer.setAddress(address);
+        customerRepository.save(newCustomer);
+
+        LOGGER.info("Customer saved successfully");
+        rabbitTemplate.convertAndSend(MQConfig.EXCHANGE, MQConfig.MESSAGE_ROUTING_KEY, newCustomer);
+        LOGGER.info("Message added to Queue by Message Broker RabbitMQ");
+
+        return newCustomer.getConversationId();
     }
 }
