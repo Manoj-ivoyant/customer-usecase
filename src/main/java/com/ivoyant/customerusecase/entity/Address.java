@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
-import org.springframework.data.cassandra.core.mapping.CassandraType;
+import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.PrimaryKeyColumn;
 import org.springframework.data.cassandra.core.mapping.Table;
 import org.springframework.data.cassandra.core.mapping.UserDefinedType;
@@ -16,9 +15,9 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@UserDefinedType("address") // Annotation for User-Defined Type
+@Table
 public class Address implements Serializable {
-    @PrimaryKeyColumn(type = PrimaryKeyType.PARTITIONED) // Define id as a primary key
+    @PrimaryKey
     private Long id;
     private String addressLane1;
     private String addressLane2;
