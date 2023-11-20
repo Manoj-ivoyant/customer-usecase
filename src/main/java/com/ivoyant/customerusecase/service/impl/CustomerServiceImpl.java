@@ -27,7 +27,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     private AddressRepository addressRepository;
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemp;
 
     @Override
     public String createCustomer(CustomerDto customerDto) {
@@ -52,8 +52,8 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.save(newCustomer);
         LOGGER.info("Customer saved successfully");
 
-        rabbitTemplate.convertAndSend(MQConfig.EXCHANGE,MQConfig.CUSTOMER_ROUTING_KEY,newCustomer);
-        rabbitTemplate.convertAndSend(MQConfig.EXCHANGE,MQConfig.ADDRESS_ROUTING_KEY,address);
+        rabbitTemp.convertAndSend(MQConfig.EXCHANGE,MQConfig.CUSTOMER_ROUTING_KEY,newCustomer);
+        rabbitTemp.convertAndSend(MQConfig.EXCHANGE,MQConfig.ADDRESS_ROUTING_KEY,address);
         LOGGER.info("message published to Queue by MessageBroker");
         return newCustomer.getConversationId();
     }
