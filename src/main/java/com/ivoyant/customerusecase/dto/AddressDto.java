@@ -9,7 +9,6 @@ import lombok.Data;
 @Builder
 public class AddressDto {
     @NotBlank(message = "first name is required")
-    @Pattern(regexp = "[A-Z][a-z]*", message = "first name must starts with uppercase")
     private String addressLane1;
     private String addressLane2;
     @NotBlank(message = "city is required field")

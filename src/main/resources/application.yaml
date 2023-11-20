@@ -5,23 +5,7 @@ spring:
     password: elastic
 
 
-  cassandra:
-    port: 9042
-    keyspace-name: mykeyspace
-    username: cassandra
-    password: cassandra
-    contact-points: some-cassandra
-    schema-action: CREATE_IF_NOT_EXISTS
-    local-datacenter: datacenter1
-    request:
-        timeout: 50000 # in milliseconds
-    connect:
-        timeout: 100000 # in milliseconds
-    init-query-timeout: 150000 # in milliseconds
-    socket:
-        connect-timeout: 50000 # in milliseconds
-        read-timeout: 100000 # in milliseconds
-        write-timeout: 100000 # in milliseconds
+
 
 
 
