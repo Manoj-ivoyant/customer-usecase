@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.cassandra.core.mapping.CassandraType;
+import org.springframework.data.cassandra.core.mapping.Indexed;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
@@ -19,7 +21,10 @@ public class Customer implements Serializable {
     private String conversationId;
     private String firstName;
     private String lastName;
+    @Indexed
     private String phone;
+    @Indexed
     private String email;
-    private Address address;
+    private Long addressId;
+
 }

@@ -2,9 +2,12 @@ package com.ivoyant.customerusecase.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ivoyant.customerusecase.config.MQConfig;
+import com.ivoyant.customerusecase.entity.Address;
 import com.ivoyant.customerusecase.entity.Customer;
+import com.ivoyant.customerusecase.exception.CustomerNotFound;
 import com.ivoyant.customerusecase.model.AddressIndex;
 import com.ivoyant.customerusecase.model.CustomerIndex;
+import com.ivoyant.customerusecase.repository.AddressRepository;
 import jakarta.annotation.PreDestroy;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -28,22 +31,41 @@ public class ElasticController {
     private final ObjectMapper objectMapper;
 
     @Autowired
+    private AddressRepository addressRepository;
+
+    @Autowired
     public ElasticController(RestHighLevelClient restHighLevelClient, ObjectMapper objectMapper) {
         this.restHighLevelClient = restHighLevelClient;
         this.objectMapper = objectMapper;
     }
 
-    @RabbitListener(queues = MQConfig.QUEUE)
-    public void consumeMessages(Customer customer) {
+    @RabbitListener(queues = MQConfig.ADDRESS_QUEUE)
+    public void consumeAddressMessage(Address address) {
         try {
             AddressIndex addressIndex = AddressIndex.builder()
-                    .addressLane1(customer.getAddress().getAddressLane1())
-                    .addressLane2(customer.getAddress().getAddressLane2())
-                    .id(customer.getAddress().getId())
-                    .zip(customer.getAddress().getZip())
-                    .city(customer.getAddress().getCity())
-                    .state(customer.getAddress().getState())
+                    .addressLane1(address.getAddressLane1())
+                    .addressLane2(address.getAddressLane2())
+                    .id(address.getId())
+                    .zip(address.getZip())
+                    .city(address.getCity())
+                    .state(address.getState())
                     .build();
+
+            String addressJson = objectMapper.writeValueAsString(addressIndex);
+            IndexRequest indexRequest = new IndexRequest("address").source(addressJson, XContentType.JSON);
+
+            IndexResponse indexResponse = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
+            String indexId = indexResponse.getId();
+            LOGGER.info("Address data indexed with ID: {}", indexId);
+        } catch (IOException e) {
+            LOGGER.error("Error processing address message: {}", e.getMessage());
+        }
+    }
+
+    @RabbitListener(queues = MQConfig.CUSTOMER_QUEUE)
+    public void consumeCustomerMessage(Customer customer) {
+        try {
+            AddressIndex addressIndex = getAddressIndexFromCustomer(customer); // Get AddressIndex from Customer
 
             CustomerIndex customerIndex = CustomerIndex.builder()
                     .conversationId(customer.getConversationId())
@@ -55,18 +77,28 @@ public class ElasticController {
                     .build();
 
             String customerJson = objectMapper.writeValueAsString(customerIndex);
-
-            IndexRequest indexRequest = new IndexRequest("customer")
-                    .source(customerJson, XContentType.JSON);
+            IndexRequest indexRequest = new IndexRequest("customer").source(customerJson, XContentType.JSON);
 
             IndexResponse indexResponse = restHighLevelClient.index(indexRequest, RequestOptions.DEFAULT);
             String indexId = indexResponse.getId();
-            LOGGER.info("Data indexed with ID: {}", indexId);
+            LOGGER.info("Customer data indexed with ID: {}", indexId);
         } catch (IOException e) {
-            LOGGER.error("Error processing message: {}", e.getMessage());
+            LOGGER.error("Error processing customer message: {}", e.getMessage());
         }
     }
 
+    private AddressIndex getAddressIndexFromCustomer(Customer customer) {
+
+        Address address =addressRepository.findById(customer.getAddressId()).orElseThrow(()->new CustomerNotFound());
+        return AddressIndex.builder()
+                .addressLane1(address.getAddressLane1())
+                .addressLane2(address.getAddressLane2())
+                .id(address.getId())
+                .zip(address.getZip())
+                .city(address.getCity())
+                .state(address.getState())
+                .build();
+    }
 
     @PreDestroy
     public void closeClient() {

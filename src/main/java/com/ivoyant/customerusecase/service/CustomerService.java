@@ -1,9 +1,13 @@
 package com.ivoyant.customerusecase.service;
 
 import com.ivoyant.customerusecase.dto.CustomerDto;
-import org.springframework.stereotype.Service;
 
 
 public interface CustomerService {
-    public String createCustomer(CustomerDto customerDto);
+    String createCustomer(CustomerDto customerDto);
+
+     String deleteByKey(String key);
+    CustomerDto getByKey(String key);
+
+    String updateByKey(String key,CustomerDto customerDto);
 }
