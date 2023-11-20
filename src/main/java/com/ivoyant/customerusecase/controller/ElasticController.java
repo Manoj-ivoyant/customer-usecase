@@ -27,8 +27,6 @@ public class ElasticController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticController.class);
 
-    private final RestHighLevelClient restHighLevelClient;
-    private final ObjectMapper objectMapper;
 
     @Autowired
     private AddressRepository addressRepository;
