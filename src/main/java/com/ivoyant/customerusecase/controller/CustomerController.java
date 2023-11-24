@@ -28,9 +28,9 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{key}")
-    public ResponseEntity<String> deleteByKey(@Valid @PathVariable @NotBlank(message = "key is required field")
+    public void deleteByKey(@Valid @PathVariable @NotBlank(message = "key is required field")
                                                 String key ){
-        return ResponseEntity.ok(customerService.deleteByKey(key));
+        customerService.deleteByKey(key);
     }
 
     @PutMapping("/{key}")

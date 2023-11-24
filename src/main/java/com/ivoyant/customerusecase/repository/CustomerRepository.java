@@ -10,8 +10,8 @@ import java.util.Optional;
 public interface CustomerRepository extends CassandraRepository<Customer, String> {
     Customer findByEmail(String email);
 
-    Optional<Customer> findByConversationId(String conversationId);
+    Customer findByConversationId(String conversationId);
 
-    Optional<Customer> findByPhone(String phone);
+    Customer findByPhone(String phone);
 
 }

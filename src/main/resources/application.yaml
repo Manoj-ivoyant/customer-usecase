@@ -1,8 +1,21 @@
 spring:
   elasticsearch:
-    uris: http://localhost/9200
     username: elastic
     password: elastic
+    uris: localhost
+    port: 9200
+    schema: http
+
+
+app:
+  messaging:
+    customer-queue: customer_queue
+    address-queue: address_queue
+    exchange: msg_exchange
+    customer-routing-key: customer_routing_key
+    address-routing-key: address_routing_key
+
+
 
 
 

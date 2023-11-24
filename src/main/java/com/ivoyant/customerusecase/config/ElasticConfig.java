@@ -16,7 +16,8 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class ElasticConfig {
 
-    private String schema = "http";
+    @Value("${spring.elasticsearch.schema}")
+    private String schema ;
 
     @Value("${spring.elasticsearch.username}")
     private String userName;
@@ -24,7 +25,8 @@ public class ElasticConfig {
     private String password;
     @Value("${spring.elasticsearch.uris}")
     private String clusterName;
-    private String port = "9200";
+    @Value("${spring.elasticsearch.port}")
+    private String port ;
 
     @Bean
     public RestTemplate restTemplate() {

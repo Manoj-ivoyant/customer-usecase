@@ -89,7 +89,7 @@ public class ElasticController {
 
     private AddressIndex getAddressIndexFromCustomer(Customer customer) {
 
-        Address address =addressRepository.findById(customer.getAddressId()).orElseThrow(()->new CustomerNotFound());
+        Address address = addressRepository.findById(customer.getAddressId()).orElseThrow(() -> new CustomerNotFound());
         return AddressIndex.builder()
                 .addressLane1(address.getAddressLane1())
                 .addressLane2(address.getAddressLane2())

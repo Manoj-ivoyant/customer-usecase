@@ -30,6 +30,8 @@ public class CustomerServiceImpl implements CustomerService {
     private AddressRepository addressRepository;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private QueryResolver queryResolver;
 
     @Override
     public String createCustomer(CustomerDto customerDto) {
@@ -62,8 +64,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDto getByKey(String key) {
-        Customer customer = QueryResolver.findByConversationIdOrPhone(key,key);
-        Address address = addressRepository.findById(customer.getAddressId()).orElseThrow(() -> new CustomerNotFound());
+        Customer customer = queryResolver.findByConversationIdOrPhone(key,key);
+        Address address = addressRepository.findById(customer.getAddressId()).orElseThrow(CustomerNotFound::new);
         AddressDto addressDto = AddressDto.builder().addressLane1(address.getAddressLane1())
                 .addressLane2(address.getAddressLane2())
                 .zip(address.getZip().toString()).state(address.getState()).city(address.getCity()).build();
@@ -76,20 +78,19 @@ public class CustomerServiceImpl implements CustomerService {
 
 
     @Override
-    public String deleteByKey(String key) {
-        Customer customer = QueryResolver.findByConversationIdOrPhone(key,key);
-        Address address = addressRepository.findById(customer.getAddressId()).orElseThrow(() -> new CustomerNotFound());
+    public void deleteByKey(String key) {
+        Customer customer = queryResolver.findByConversationIdOrPhone(key,key);
+        Address address = addressRepository.findById(customer.getAddressId()).orElseThrow(CustomerNotFound::new);
         LOGGER.info("Customer with id deleted {}", key);
         customerRepository.delete(customer);
         addressRepository.delete(address);
         LOGGER.info("Customer deleted");
-        return "";
     }
 
     @Override
     public  String updateByKey(String key,CustomerDto customerDto){
-        Customer customer= QueryResolver.findByConversationIdOrPhone(key,key);
-        Address address=addressRepository.findById(customer.getAddressId()).orElseThrow(()->new CustomerNotFound());
+        Customer customer= queryResolver.findByConversationIdOrPhone(key,key);
+        Address address=addressRepository.findById(customer.getAddressId()).orElseThrow(CustomerNotFound::new);
         customer.setFirstName(customerDto.getFirstName());
         customer.setLastName(customerDto.getLastName());
         customer.setPhone(customerDto.getPhone());
