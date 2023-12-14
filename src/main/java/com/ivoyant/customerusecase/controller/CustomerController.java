@@ -2,6 +2,8 @@ package com.ivoyant.customerusecase.controller;
 
 import com.ivoyant.customerusecase.dto.CustomerDto;
 import com.ivoyant.customerusecase.service.CustomerService;
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
+    @Timed(value = "customerController.execution.time", description = "Execution time of CustomerController")
+    @Counted(value = "customerController.invocation.count", description = "Invocation count of CustomerController")
     @PostMapping
     public ResponseEntity<String> createCustomer(@Valid @RequestBody CustomerDto customerDto) {
         return ResponseEntity.ok(customerService.createCustomer(customerDto));

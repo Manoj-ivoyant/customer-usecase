@@ -15,6 +15,18 @@ app:
     customer-routing-key: customer_routing_key
     address-routing-key: address_routing_key
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 
 
