@@ -7,7 +7,6 @@ import io.micrometer.core.annotation.Timed;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,14 +32,14 @@ public class CustomerController {
 
     @DeleteMapping("/{key}")
     public void deleteByKey(@Valid @PathVariable @NotBlank(message = "key is required field")
-                                                String key ){
+                            String key) {
         customerService.deleteByKey(key);
     }
 
     @PutMapping("/{key}")
     public ResponseEntity<String> updateByKey(@Valid @PathVariable @NotBlank(message = "key is required field")
-                                                  String key,@RequestBody CustomerDto customerDto){
-        return ResponseEntity.ok(customerService.updateByKey(key,customerDto));
+                                              String key, @RequestBody CustomerDto customerDto) {
+        return ResponseEntity.ok(customerService.updateByKey(key, customerDto));
     }
 
 }

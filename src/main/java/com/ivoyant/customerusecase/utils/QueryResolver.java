@@ -12,16 +12,17 @@ public class QueryResolver {
     @Autowired
     private CustomerRepository customerRepository;
 
-    public  Customer findByConversationIdOrPhone(String conversationId, String phone) {
+    public Customer findByConversationIdOrPhone(String conversationId, String phone) {
         Customer customerByConversationId = customerRepository.findByConversationId(conversationId);
         Customer customerByPhone = customerRepository.findByPhone(phone);
-        if(customerByConversationId==null||customerByPhone==null){
-            throw new CustomerNotFound();
-        }
-        if(customerByConversationId!=null){
-            return customerByConversationId;
-        }
-        else return customerByPhone;
-    }
 
+        if (customerByConversationId != null) {
+            return customerByConversationId;
+        } else if (customerByPhone != null) {
+            return customerByPhone;
+        } else {
+            throw new CustomerNotFound(); // Customer not found for either conversationId or phone
+        }
+    }
 }
+
